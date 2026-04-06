@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bonus — Have I Been Pwned? | NullSec Workshop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --step-color: var(--neon-yellow); }
+
+    .hibp-site {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      color: #111;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .hibp-header {
+      background: #2f2f2f;
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hibp-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+    }
+
+    .hibp-logo span { color: #f44; }
+
+    .hibp-body { padding: 30px; }
+
+    .hibp-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 6px;
+    }
+
+    .hibp-sub {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .hibp-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hibp-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      color: #111;
+    }
+
+    .hibp-input:focus { border-color: #f44; }
+
+    .hibp-btn {
+      padding: 12px 24px;
+      background: #f44;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .hibp-btn:hover { background: #d33; }
+
+    .hibp-result { display: none; animation: fadeUp 0.4s forwards; }
+    .hibp-result.show { display: block; }
+
+    .pwned-banner {
+      background: #fff2f2;
+      border: 2px solid #f44;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .pwned-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #c41e3a;
+      margin-bottom: 6px;
+    }
+
+    .pwned-count {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .breach-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .breach-item {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .breach-icon { font-size: 1.5rem; }
+
+    .breach-name {
+      font-weight: 700;
+      color: #222;
+      font-size: 0.95rem;
+    }
+
+    .breach-meta {
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    .breach-data {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: flex-end;
+    }
+
+    .data-tag {
+      background: #ffe0e0;
+      color: #c41e3a;
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .safe-banner {
+      background: #f0fff4;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      padding: 20px 24px;
+      color: #166534;
+    }
+
+    .safe-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .challenge-badge {
+      display: inline-block;
+      background: rgba(255, 238, 0, 0.1);
+      border: 1px solid var(--neon-yellow);
+      color: var(--neon-yellow);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .sample-emails {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 20px;
+    }
+
+    .email-chip {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 238, 0, 0.3);
+      border-radius: 4px;
+      color: var(--neon-yellow);
+      background: rgba(255, 238, 0, 0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .email-chip:hover {
+      background: rgba(255, 238, 0, 0.12);
+      border-color: var(--neon-yellow);
+    }
+
+    .real-link-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 30px 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .real-link-box .icon { font-size: 2rem; }
+
+    .real-link-box h4 {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .real-link-box p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .real-link-box a {
+      margin-left: auto;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--neon-cyan);
+      border: 1px solid var(--neon-cyan);
+      padding: 8px 18px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .real-link-box a:hover {
+      background: var(--neon-cyan);
+      color: var(--bg-deep);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">NPICT <span>ORION</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="activity-a.html">Bank Heist</a></li>
+    <li><a href="activity-b.html">Cookie Monster</a></li>
+    <li><a href="activity-c.html">SQL Injection</a></li>
+    <li><a href="activity-d.html" class="active">Bonus</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+<div class="activity-page">
+
+  <div class="activity-header">
+    <div class="activity-breadcrumb">
+      <a href="index.html">Home</a> › Activities › Bonus
+    </div>
+    <div class="activity-tag" style="color: var(--neon-yellow); border-color: var(--neon-yellow);">// BONUS ROUND — DATA BREACHES</div>
+    <h1 class="activity-h1">🔓 Have I Been Pwned?</h1>
+    <p class="activity-intro">
+      Every year, millions of usernames and passwords are stolen from websites and leaked online. In this activity, you'll use a <strong>simulated breach checker</strong> — and then the real one — to understand why password reuse is so dangerous.
+    </p>
+  </div>
+
+  <div class="challenge-badge">🎯 BONUS: Check these sample emails and see which ones were in breaches</div>
+
+  <div style="margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;">// Try these sample emails:</div>
+  <div class="sample-emails">
+    <span class="email-chip" onclick="fillEmail('john.doe@gmail.com')">john.doe@gmail.com</span>
+    <span class="email-chip" onclick="fillEmail('sarah.jones@yahoo.com')">sarah.jones@yahoo.com</span>
+    <span class="email-chip" onclick="fillEmail('secure.user@proton.me')">secure.user@proton.me</span>
+    <span class="email-chip" onclick="fillEmail('mike1990@hotmail.com')">mike1990@hotmail.com</span>
+    <span class="email-chip" onclick="fillEmail('test@test.com')">test@test.com</span>
+  </div>
+
+  <!-- FAKE HIBP SITE -->
+  <div class="demo-container">
+    <div class="demo-bar">
+      <div class="demo-dots"><span></span><span></span><span></span></div>
+      <div class="demo-url">🔒 nullsec.workshop/breach-checker (simulated)</div>
+    </div>
+    <div class="demo-body">
+      <div class="hibp-site">
+        <div class="hibp-header">
+          <span>🔍</span>
+          <div class="hibp-logo">Have I Been <span>Pwned</span>?</div>
+          <span style="margin-left: auto; font-size: 0.75rem; color: #aaa;">Simulated Demo</span>
+        </div>
+        <div class="hibp-body">
+          <div class="hibp-title">Check if your email is in a data breach</div>
+          <div class="hibp-sub">Enter your email address to see if your account details have been compromised.</div>
+          <div class="hibp-form">
+            <input type="email" class="hibp-input" id="emailInput" placeholder="you@example.com" />
+            <button class="hibp-btn" onclick="checkBreaches()">pwned?</button>
+          </div>
+          <div class="hibp-result" id="hibpResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINK TO REAL SITE -->
+  <div class="real-link-box">
+    <div class="icon">🌐</div>
+    <div>
+      <h4>Check the REAL site</h4>
+      <p>The actual HaveIBeenPwned.com by Troy Hunt — checks against 14 billion+ real compromised accounts.</p>
+    </div>
+    <a href="https://haveibeenpwned.com" target="_blank" rel="noopener">Visit →</a>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <h3>🧠 Why Does This Matter?</h3>
+    <p>
+      When a website gets hacked, attackers steal the database — including hashed passwords. Even if the hash can't be cracked, they can use <strong>credential stuffing</strong>: automatically trying the stolen username/password combo on Netflix, Gmail, banking sites, and more.
+    </p>
+    <p>
+      If you use the same password everywhere, <strong>one breach = all accounts compromised</strong>. The fix: use a different strong password for every site — and a password manager to remember them all.
+    </p>
+    <p>
+      Real-world victims include Adobe (153M accounts), LinkedIn (700M), Canva (137M), and RockYou (32M plain-text passwords).
+    </p>
+  </div>
+
+  <div class="activity-nav">
+    <a href="activity-c.html" class="btn btn-pink">← SQL Injection</a>
+    <a href="index.html" class="btn btn-cyan">🏠 Back to Home</a>
+  </div>
+
+</div>
+</div>
+
+<script>
+  const BREACH_DATA = {
+    'john.doe@gmail.com': [
+      { icon: '🎮', name: 'Adobe', year: '2013', records: '153M', data: ['Emails', 'Passwords', 'Hints'] },
+      { icon: '💼', name: 'LinkedIn', year: '2016', records: '700M', data: ['Emails', 'Passwords', 'Phone'] },
+      { icon: '🎨', name: 'Canva', year: '2019', records: '137M', data: ['Emails', 'Names', 'Passwords'] },
+    ],
+    'sarah.jones@yahoo.com': [
+      { icon: '🟣', name: 'Yahoo', year: '2013', records: '3B', data: ['Emails', 'Passwords', 'Security Qs'] },
+      { icon: '🎬', name: 'MySpace', year: '2008', records: '360M', data: ['Usernames', 'Passwords'] },
+    ],
+    'mike1990@hotmail.com': [
+      { icon: '🎮', name: 'PlayStation Network', year: '2011', records: '77M', data: ['Emails', 'Addresses', 'CC (partial)'] },
+      { icon: '🛒', name: 'eBay', year: '2014', records: '145M', data: ['Emails', 'Passwords', 'Addresses'] },
+      { icon: '🏨', name: 'Marriott Hotels', year: '2018', records: '500M', data: ['Names', 'Emails', 'Passport Nos'] },
+      { icon: '🔑', name: 'RockYou2024', year: '2024', records: '10B', data: ['Passwords (plain text)'] },
+    ],
+    'test@test.com': [
+      { icon: '📸', name: 'Snapchat', year: '2014', records: '4.6M', data: ['Usernames', 'Phone numbers'] },
+    ],
+  };
+
+  function fillEmail(email) {
+    document.getElementById('emailInput').value = email;
+  }
+
+  function checkBreaches() {
+    const email = document.getElementById('emailInput').value.trim().toLowerCase();
+    const resultEl = document.getElementById('hibpResult');
+
+    if (!email || !email.includes('@')) {
+      resultEl.className = 'hibp-result show';
+      resultEl.innerHTML = '<div style="color: #888; font-size: 0.9rem;">Please enter a valid email address.</div>';
+      return;
+    }
+
+    const breaches = BREACH_DATA[email];
+    resultEl.className = 'hibp-result show';
+
+    if (breaches && breaches.length > 0) {
+      resultEl.innerHTML = `
+        <div class="pwned-banner">
+          <div class="pwned-title">⚠️ Oh no — pwned!</div>
+          <div class="pwned-count"><strong>${email}</strong> was found in <strong>${breaches.length} data breach${breaches.length > 1 ? 'es' : ''}</strong>.</div>
+          <div class="breach-list">
+            ${breaches.map(b => `
+              <div class="breach-item">
+                <div class="breach-icon">${b.icon}</div>
+                <div>
+                  <div class="breach-name">${b.name}</div>
+                  <div class="breach-meta">${b.year} · ${b.records} records</div>
+                </div>
+                <div class="breach-data">
+                  ${b.data.map(d => `<span class="data-tag">${d}</span>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div style="font-size: 0.85rem; color: #888; line-height: 1.6;">
+          ⚡ Action: Change your password on any site where you used the same credentials. Enable 2FA everywhere.
+        </div>
+      `;
+    } else {
+      resultEl.innerHTML = `
+        <div class="safe-banner">
+          <div class="safe-title">✅ Good news — no pwnage found!</div>
+          <div style="font-size: 0.9rem; margin-top: 6px;">
+            <strong>${email}</strong> wasn't found in any known data breaches in our simulated database.<br>
+            <span style="color: #15803d;">Keep using strong, unique passwords and enable 2FA everywhere.</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  document.getElementById('emailInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkBreaches();
+  });
+</script>
+
+</body>
+</html>

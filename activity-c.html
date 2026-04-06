@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity 03 — SQL Injection | NullSec Workshop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --step-color: var(--neon-pink); }
+
+    .login-site {
+      background: #0f0f1a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .login-header {
+      background: #1a1a2e;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bank-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+
+    .bank-name span { color: var(--neon-cyan); }
+
+    .login-form-wrap {
+      padding: 30px;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .login-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .sql-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #1c1c2e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .sql-input:focus {
+      border-color: #ff0080;
+      box-shadow: 0 0 0 3px rgba(255, 0, 128, 0.1);
+    }
+
+    .sql-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: #555;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1a1a5e, #0f3460);
+      border: 1px solid #334;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .login-btn:hover {
+      background: linear-gradient(135deg, #2a2a8e, #0f4480);
+      border-color: #446;
+    }
+
+    .login-result {
+      margin-top: 16px;
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .login-result.denied {
+      background: rgba(255, 0, 0, 0.08);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #ff4444;
+      display: block;
+    }
+
+    .login-result.granted {
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: #00ff88;
+      display: block;
+    }
+
+    .sql-visualizer {
+      background: #010a12;
+      border: 1px solid rgba(255, 0, 128, 0.2);
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.83rem;
+      line-height: 1.9;
+      margin: 20px 0;
+    }
+
+    .sql-comment { color: #555; }
+    .sql-keyword { color: #ff6699; }
+    .sql-string { color: #ffcc00; }
+    .sql-injection { color: #ff0080; background: rgba(255,0,128,0.1); padding: 1px 4px; border-radius: 2px; }
+    .sql-safe { color: #00ff88; }
+    .sql-neutral { color: #aaa; }
+
+    .challenge-badge {
+      display: inline-block;
+      background: rgba(255, 0, 128, 0.1);
+      border: 1px solid var(--neon-pink);
+      color: var(--neon-pink);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .payload-chip {
+      display: inline-block;
+      background: rgba(255, 0, 128, 0.08);
+      border: 1px solid rgba(255, 0, 128, 0.3);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--neon-pink);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 4px;
+    }
+
+    .payload-chip:hover {
+      background: rgba(255, 0, 128, 0.18);
+      border-color: var(--neon-pink);
+    }
+
+    .payloads-wrap {
+      margin: 12px 0 20px;
+    }
+
+    .payloads-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">NPICT <span>ORION</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="activity-a.html">Bank Heist</a></li>
+    <li><a href="activity-b.html">Cookie Monster</a></li>
+    <li><a href="activity-c.html" class="active">SQL Injection</a></li>
+    <li><a href="activity-d.html">Bonus</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+<div class="activity-page">
+
+  <div class="activity-header">
+    <div class="activity-breadcrumb">
+      <a href="index.html">Home</a> › Activities › Activity 03
+    </div>
+    <div class="activity-tag" style="color: var(--neon-pink); border-color: var(--neon-pink);">// ACTIVITY 03 — SQL INJECTION</div>
+    <h1 class="activity-h1">💉 SQL Injection</h1>
+    <p class="activity-intro">
+      Most websites store data in a database using SQL. When developers forget to sanitize user input, attackers can <strong>inject SQL commands</strong> directly into queries — tricking the database into bypassing authentication entirely.
+    </p>
+  </div>
+
+  <div class="challenge-badge">🎯 CHALLENGE: Log in without knowing the password</div>
+
+  <!-- FAKE LOGIN -->
+  <div class="demo-container">
+    <div class="demo-bar">
+      <div class="demo-dots"><span></span><span></span><span></span></div>
+      <div class="demo-url">🔒 bank.nullsec.workshop/login</div>
+    </div>
+    <div class="demo-body">
+      <div class="login-site">
+        <div class="login-header">
+          <span>🏛️</span>
+          <div class="bank-name">NULL<span>BANK</span> — Secure Login</div>
+        </div>
+        <div class="login-form-wrap">
+          <div class="login-title">Administrator Login</div>
+          <div class="login-sub">Authorised personnel only</div>
+
+          <div>
+            <label class="sql-label" for="uname">Username</label>
+            <input type="text" class="sql-input" id="uname" placeholder="Enter username..." autocomplete="off" />
+          </div>
+
+          <div>
+            <label class="sql-label" for="pwd">Password</label>
+            <input type="password" class="sql-input" id="pwd" placeholder="Enter password..." />
+          </div>
+
+          <button class="login-btn" onclick="attemptLogin()">LOGIN →</button>
+
+          <div class="login-result" id="loginResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYLOADS -->
+  <div class="payloads-wrap">
+    <div class="payloads-label">// Try these SQL Injection payloads in the Username field:</div>
+    <div>
+      <span class="payload-chip" onclick="fillPayload(this, `' OR '1'='1`)">&#x27; OR '1'='1</span>
+      <span class="payload-chip" onclick="fillPayload(this, `' OR 1=1 --`)">&#x27; OR 1=1 --</span>
+      <span class="payload-chip" onclick="fillPayload(this, `admin' --`)">admin' --</span>
+      <span class="payload-chip" onclick="fillPayload(this, `' OR 'x'='x`)">&#x27; OR 'x'='x</span>
+    </div>
+  </div>
+
+  <!-- SQL VISUALIZER -->
+  <div style="margin-bottom: 6px; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;">// Live SQL Query Preview</div>
+  <div class="sql-visualizer" id="sqlViz">
+    <span class="sql-comment">-- What the server runs when you click Login:</span><br>
+    <span class="sql-keyword">SELECT</span> <span class="sql-neutral">*</span> <span class="sql-keyword">FROM</span> <span class="sql-neutral">users</span><br>
+    <span class="sql-keyword">WHERE</span> <span class="sql-neutral">username</span> = <span class="sql-string" id="vizUser">'[your input]'</span><br>
+    <span class="sql-keyword">AND</span> <span class="sql-neutral">password</span> = <span class="sql-string">'[password]'</span><span class="sql-neutral">;</span><br><br>
+    <span class="sql-comment">-- Type in the username box to see what your payload does →</span>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active-step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Click one of the payload chips above</div>
+        <div class="step-desc">
+          Tap any of the red payload buttons — they'll auto-fill the username field. Watch the SQL preview update in real-time!
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Leave the password blank (or type anything)</div>
+        <div class="step-desc">
+          You don't know the password — but that won't matter. The SQL injection will make the condition always true, bypassing the check entirely.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Click LOGIN and get in</div>
+        <div class="step-desc">
+          The database will evaluate your injected query. Because <code>1=1</code> is always true, the WHERE condition passes and you're logged in — no password needed.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <div class="hint-icon">💡</div>
+    <div class="hint-text">
+      The <code>--</code> in SQL means "comment everything after this". So <code>admin' --</code> closes the username string and comments out the password check entirely.
+      The query becomes: <code>SELECT * FROM users WHERE username = 'admin'</code> — no password required!
+    </div>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <h3>🧠 What Just Happened?</h3>
+    <p>
+      The server built the SQL query by <strong>directly concatenating your input</strong> without checking it. When you typed <code>' OR 1=1 --</code>, the quote character broke out of the string, and your SQL became part of the actual database command.
+    </p>
+    <p>
+      The fix is simple: use <strong>Prepared Statements</strong> (also called parameterized queries). These separate the SQL code from the data, so no matter what a user types, it's treated as data — never as executable SQL.
+    </p>
+    <p>
+      SQL injection has been the #1 web vulnerability for over a decade and caused breaches at Yahoo, LinkedIn, Sony, and many more.
+    </p>
+  </div>
+
+  <div class="activity-nav">
+    <a href="activity-b.html" class="btn btn-green">← Cookie Monster</a>
+    <a href="activity-d.html" class="btn btn-cyan" style="color: var(--neon-yellow); border-color: var(--neon-yellow); background: rgba(255,238,0,0.07);">Bonus Round →</a>
+  </div>
+
+</div>
+</div>
+
+<script>
+  const unameEl = document.getElementById('uname');
+  const vizUser = document.getElementById('vizUser');
+  const sqlViz = document.getElementById('sqlViz');
+
+  unameEl.addEventListener('input', updateViz);
+
+  function updateViz() {
+    const val = unameEl.value;
+    if (!val) {
+      vizUser.textContent = "'[your input]'";
+      vizUser.className = 'sql-string';
+      return;
+    }
+
+    const isInjection = val.includes("'") || val.includes('--') || val.toLowerCase().includes(' or ') || val.toLowerCase().includes('1=1');
+
+    if (isInjection) {
+      vizUser.innerHTML = `<span class="sql-injection">'${escapeHtml(val)}'</span> <span style="color:#ff0080; font-size:0.75rem;">← ⚠️ INJECTION DETECTED</span>`;
+    } else {
+      vizUser.textContent = `'${val}'`;
+      vizUser.className = 'sql-safe';
+    }
+  }
+
+  function fillPayload(el, payload) {
+    unameEl.value = payload;
+    updateViz();
+    unameEl.focus();
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  const INJECTION_PATTERNS = [
+    /'\s*or\s*'?1'?\s*=\s*'?1/i,
+    /'\s*or\s*1\s*=\s*1/i,
+    /'\s*--/i,
+    /'\s*or\s*'[^']*'\s*=\s*'[^']*/i,
+    /admin'\s*--/i,
+  ];
+
+  function attemptLogin() {
+    const uname = unameEl.value;
+    const result = document.getElementById('loginResult');
+
+    const injected = INJECTION_PATTERNS.some(p => p.test(uname));
+
+    if (injected) {
+      result.className = 'login-result granted';
+      result.innerHTML = `
+        ✅ ACCESS GRANTED — Welcome, Administrator!<br><br>
+        <span style="color:#aaa;">Logged in as:</span> admin<br>
+        <span style="color:#aaa;">Role:</span> SUPERADMIN<br>
+        <span style="color:#aaa;">Last login:</span> Never (account was "protected")<br><br>
+        <span style="color:#555;">Your payload: <span style="color:#ff0080;">${escapeHtml(uname)}</span><br>
+        bypassed the password check entirely.</span>
+      `;
+    } else if (!uname) {
+      result.className = 'login-result denied';
+      result.innerHTML = '❌ Username cannot be empty.';
+    } else {
+      result.className = 'login-result denied';
+      result.innerHTML = `❌ ACCESS DENIED — Invalid credentials.<br><span style="color:#555;">Hint: try one of the red payload chips above!</span>`;
+    }
+  }
+</script>
+
+</body>
+</html>

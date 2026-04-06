@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NullSec Workshop — Ngee Ann Polytechnic</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .hero-graphic {
+      position: relative;
+      width: 340px;
+      height: 200px;
+      margin: 40px auto 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 1s forwards;
+    }
+
+    .hex-grid {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hex-ring {
+      width: 160px; height: 160px;
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 50%;
+      position: absolute;
+      animation: spin 20s linear infinite;
+    }
+
+    .hex-ring:nth-child(2) {
+      width: 240px; height: 240px;
+      border-color: rgba(0, 128, 255, 0.15);
+      animation-duration: 30s;
+      animation-direction: reverse;
+    }
+
+    .hex-ring:nth-child(3) {
+      width: 320px; height: 320px;
+      border-color: rgba(0, 245, 255, 0.08);
+      animation-duration: 45s;
+    }
+
+    .hex-dot {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-cyan);
+      top: 0; left: 50%; transform: translateX(-50%);
+    }
+
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .center-icon {
+      position: relative;
+      z-index: 2;
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .start-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,128,255,0.1));
+      border: 1px solid var(--neon-cyan);
+      border-radius: 6px;
+      color: var(--neon-cyan);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-decoration: none;
+      text-transform: uppercase;
+      margin-top: 40px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.1);
+      opacity: 0;
+      animation: fadeUp 0.6s 1.2s forwards;
+    }
+
+    .start-btn:hover {
+      background: rgba(0, 245, 255, 0.2);
+      box-shadow: var(--glow-cyan), 0 0 60px rgba(0, 245, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 0.6s 1.6s forwards;
+    }
+
+    .scroll-hint::after {
+      content: '↓';
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    .osint-section {
+      padding: 80px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .osint-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .osint-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+      box-shadow: 0 0 20px var(--neon-cyan);
+    }
+
+    .osint-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 700px) {
+      .osint-grid { grid-template-columns: 1fr; }
+    }
+
+    .osint-item {
+      padding: 20px;
+      background: var(--bg-panel);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .osint-item-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      color: var(--neon-cyan);
+      margin-bottom: 10px;
+    }
+
+    .osint-item p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .tip-list {
+      list-style: none;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tip-list li {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .tip-list li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--neon-cyan);
+    }
+
+    .dork-examples {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .dork-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(0, 245, 255, 0.07);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: var(--neon-cyan);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .dork-tag:hover {
+      background: rgba(0, 245, 255, 0.15);
+      border-color: var(--neon-cyan);
+    }
+
+    .dork-tag .copy-hint {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+
+    .copied-toast {
+      position: fixed;
+      bottom: 30px; right: 30px;
+      background: var(--bg-panel);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: var(--glow-green);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .copied-toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">NULL<span>SEC</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="pages/activity-a.html">Bank Heist</a></li>
+    <li><a href="pages/activity-b.html">Cookie Monster</a></li>
+    <li><a href="pages/activity-c.html">SQL Injection</a></li>
+    <li><a href="pages/activity-d.html">Bonus</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">// Ngee Ann Polytechnic × Thailand Exchange Workshop</p>
+
+    <div class="hero-graphic">
+      <div class="hex-grid">
+        <div class="hex-ring"><div class="hex-dot"></div></div>
+        <div class="hex-ring"><div class="hex-dot"></div></div>
+        <div class="hex-ring"><div class="hex-dot"></div></div>
+        <div class="center-icon">🛡️</div>
+      </div>
+    </div>
+
+    <h1>
+      <div class="line1">INTRO TO</div>
+      <div class="line2">CYBERSECURITY</div>
+    </h1>
+
+    <p class="hero-sub">
+      Hands-on hacking for beginners. No experience needed —
+      just curiosity and a browser.
+    </p>
+
+    <div class="hero-badges">
+      <span class="badge badge-cyan">35 MIN SESSION</span>
+      <span class="badge badge-green">4 ACTIVITIES</span>
+      <span class="badge badge-pink">BEGINNER FRIENDLY</span>
+    </div>
+
+    <a href="#activities" class="start-btn">Start Workshop ↓</a>
+
+    <div class="scroll-hint">scroll</div>
+  </section>
+
+  <!-- OSINT SECTION -->
+  <section class="osint-section" id="osint">
+    <p class="section-title">// Module 00</p>
+    <h2 class="section-heading">OSINT — Open Source Intelligence</h2>
+
+    <div class="osint-card">
+      <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; max-width: 680px;">
+        Before we hack anything, let's learn how attackers gather information — using only publicly available tools. This is called <strong style="color: var(--text-primary);">OSINT</strong>. No illegal access, no special software. Just Google.
+      </p>
+
+      <div class="osint-grid">
+        <div class="osint-item">
+          <div class="osint-item-title">🔍 Google Lens — Reverse Image Search</div>
+          <p>Did you know you can find where a photo was taken just by uploading it to Google? Try this with your facilitator:</p>
+          <ul class="tip-list">
+            <li>Go to <strong>images.google.com</strong></li>
+            <li>Click the camera icon</li>
+            <li>Upload any landmark photo</li>
+            <li>Google will identify the location</li>
+            <li>Lesson: photos can reveal your location!</li>
+          </ul>
+        </div>
+
+        <div class="osint-item">
+          <div class="osint-item-title">🎯 Google Dorking — Secret Search Tricks</div>
+          <p>Google has advanced operators that reveal things people accidentally exposed online. Click any query below to copy it, then paste it into Google!</p>
+          <div class="dork-examples">
+            <div class="dork-tag" onclick="copyDork(this, 'site:gov filetype:pdf \"confidential\"')">
+              site:gov filetype:pdf "confidential"
+              <span class="copy-hint">click to copy</span>
+            </div>
+            <div class="dork-tag" onclick="copyDork(this, 'intitle:\"index of\" \"password.txt\"')">
+              intitle:"index of" "password.txt"
+              <span class="copy-hint">click to copy</span>
+            </div>
+            <div class="dork-tag" onclick="copyDork(this, 'site:pastebin.com intext:\"password\"')">
+              site:pastebin.com intext:"password"
+              <span class="copy-hint">click to copy</span>
+            </div>
+            <div class="dork-tag" onclick="copyDork(this, 'filetype:log \"username\" \"password\"')">
+              filetype:log "username" "password"
+              <span class="copy-hint">click to copy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer" style="margin: 0 40px 20px; max-width: 1100px; margin-left: auto; margin-right: auto;">
+    <div class="disclaimer-icon">⚠️</div>
+    <p>
+      <strong>EDUCATIONAL DISCLAIMER:</strong> All activities on this site use fake, simulated environments built for learning.
+      No real systems are being accessed. The techniques shown exist in the real world — use them only ethically and legally.
+      Unauthorized access to computer systems is a criminal offence under the Computer Misuse Act.
+    </p>
+  </div>
+
+  <!-- ACTIVITY CARDS -->
+  <section class="activities-section" id="activities">
+    <p class="section-title">// Hands-On Activities</p>
+    <h2 class="section-heading">CHOOSE YOUR MISSION</h2>
+
+    <div class="cards-grid">
+      <a href="pages/activity-a.html" class="card card--cyan">
+        <div class="card-number">// Activity 01</div>
+        <div class="card-icon">🏦</div>
+        <div class="card-title">The Bank Heist</div>
+        <div class="card-desc">Use browser DevTools to manipulate a fake banking site. Change prices, alter balances — all from Inspect Element.</div>
+        <div class="card-tag">Inspect Element</div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="pages/activity-b.html" class="card card--green">
+        <div class="card-number">// Activity 02</div>
+        <div class="card-icon">🍪</div>
+        <div class="card-title">The Cookie Monster</div>
+        <div class="card-desc">Find hidden session cookies in DevTools and change your user role from guest to admin — without a password.</div>
+        <div class="card-tag">DevTools Cookies</div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="pages/activity-c.html" class="card card--pink">
+        <div class="card-number">// Activity 03</div>
+        <div class="card-icon">💉</div>
+        <div class="card-title">SQL Injection</div>
+        <div class="card-desc">Trick a fake login page into granting you access by injecting a special command into the username field.</div>
+        <div class="card-tag">SQL Injection</div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="pages/activity-d.html" class="card card--yellow">
+        <div class="card-number">// Bonus</div>
+        <div class="card-icon">🔓</div>
+        <div class="card-title">Have I Been Pwned?</div>
+        <div class="card-desc">Check if your email has been exposed in a real-world data breach. See how hackers get your passwords.</div>
+        <div class="card-tag">Bonus Round</div>
+        <div class="card-arrow">→</div>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<div class="copied-toast" id="toast">✓ Copied to clipboard!</div>
+
+<script>
+  function copyDork(el, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  }
+
+  // Smooth scroll for hero button
+  document.querySelector('.start-btn').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('osint').scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>

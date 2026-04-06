@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity 02 — The Cookie Monster | NullSec Workshop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --step-color: var(--neon-green); }
+
+    .portal {
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .portal-header {
+      background: #1c1c1c;
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .portal-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+    }
+
+    .portal-body {
+      padding: 30px;
+      min-height: 200px;
+      transition: all 0.5s;
+    }
+
+    .portal-body.guest-mode {
+      background: #f0f4f8;
+      color: #333;
+    }
+
+    .portal-body.admin-mode {
+      background: #0a1a0a;
+      color: #00ff88;
+    }
+
+    .guest-banner {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .guest-banner h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .guest-banner p {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .locked-panel {
+      margin-top: 16px;
+      background: #e8e8e8;
+      border-radius: 8px;
+      padding: 20px;
+      opacity: 0.5;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .admin-banner {
+      display: none;
+      animation: fadeUp 0.5s forwards;
+    }
+
+    .admin-banner.visible { display: block; }
+
+    .admin-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.2rem;
+      color: #00ff88;
+      margin-bottom: 16px;
+      text-shadow: 0 0 15px #00ff88;
+    }
+
+    .secret-file {
+      background: rgba(0, 255, 136, 0.07);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 6px;
+      padding: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: #00cc66;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .secret-file .filename {
+      color: #00ff88;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .cookie-visual {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      margin: 20px 0;
+    }
+
+    .cookie-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 80px;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+
+    .cookie-row:last-child { border-bottom: none; }
+
+    .cookie-key { color: var(--text-dim); font-size: 0.75rem; }
+    .cookie-val { color: var(--neon-cyan); }
+    .cookie-highlight { color: var(--neon-green); font-weight: 700; }
+    .cookie-edit { 
+      color: var(--neon-pink); 
+      font-size: 0.7rem;
+      text-align: right;
+    }
+
+    .cookie-header {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .challenge-badge {
+      display: inline-block;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .reload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--neon-green);
+      border-radius: 4px;
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .reload-btn:hover {
+      background: var(--neon-green);
+      color: var(--bg-deep);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">NPICT <span>ORION</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="activity-a.html">Bank Heist</a></li>
+    <li><a href="activity-b.html" class="active">Cookie Monster</a></li>
+    <li><a href="activity-c.html">SQL Injection</a></li>
+    <li><a href="activity-d.html">Bonus</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+<div class="activity-page">
+
+  <div class="activity-header">
+    <div class="activity-breadcrumb">
+      <a href="index.html">Home</a> › Activities › Activity 02
+    </div>
+    <div class="activity-tag" style="color: var(--neon-green); border-color: var(--neon-green);">// ACTIVITY 02 — SESSION COOKIES</div>
+    <h1 class="activity-h1">🍪 The Cookie Monster</h1>
+    <p class="activity-intro">
+      Websites use small data files called <strong>cookies</strong> to remember who you are. Some websites store your user role — like <em>guest</em> or <em>admin</em> — directly in a cookie. If they don't protect it properly, anyone can just… change it.
+    </p>
+  </div>
+
+  <div class="challenge-badge">🎯 CHALLENGE: Change your role from guest → admin and unlock the secret files</div>
+
+  <!-- FAKE PORTAL -->
+  <div class="demo-container">
+    <div class="demo-bar">
+      <div class="demo-dots"><span></span><span></span><span></span></div>
+      <div class="demo-url">🔒 admin.nullsec.workshop/portal</div>
+    </div>
+    <div class="demo-body">
+      <div class="portal">
+        <div class="portal-header">
+          <span>🛡️</span>
+          <span class="portal-logo">NullSec Admin Portal</span>
+          <span style="margin-left: auto; font-size: 0.8rem; color: #888;" id="roleLabel">Logged in as: <strong style="color: #ff8800;">GUEST</strong></span>
+        </div>
+
+        <div class="portal-body guest-mode" id="portalBody">
+          <div class="guest-banner" id="guestView">
+            <h3>👤 Welcome, Guest User</h3>
+            <p>You are logged in with limited access. Admin panel is restricted.</p>
+            <div class="locked-panel">
+              🔒 Secret Files — ACCESS DENIED<br>
+              🔒 User Management — ACCESS DENIED<br>
+              🔒 System Logs — ACCESS DENIED
+            </div>
+          </div>
+          <div class="admin-banner" id="adminView">
+            <div class="admin-title">⚡ ROOT ACCESS GRANTED</div>
+            <div class="secret-file">
+              <div class="filename">📄 /etc/passwd_dump.txt</div>
+              root:$2b$12$abc123xyz...<br>
+              admin:$2b$12$def456uvw...<br>
+              user01:$2b$12$ghi789rst...
+            </div>
+            <div class="secret-file">
+              <div class="filename">📄 /var/logs/access.log</div>
+              [2025-01-15] 192.168.1.44 — Login success: admin<br>
+              [2025-01-15] 10.0.0.8 — Failed attempt: root<br>
+              [2025-01-15] 172.16.0.2 — Exfil attempt blocked
+            </div>
+            <div class="secret-file">
+              <div class="filename">🔑 api_keys.env</div>
+              AWS_SECRET=AKIAIOSFODNN7EXAMPLE<br>
+              DB_PASSWORD=s3cr3t_db_p@ss<br>
+              JWT_SECRET=nullsec_w0rksh0p_2025
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT THE COOKIE LOOKS LIKE -->
+  <div class="cookie-visual">
+    <div class="cookie-header">Application › Cookies › admin.nullsec.workshop</div>
+    <div class="cookie-row">
+      <span class="cookie-key">Name</span>
+      <span class="cookie-key">Value</span>
+      <span class="cookie-key">Action</span>
+    </div>
+    <div class="cookie-row">
+      <span>session_id</span>
+      <span class="cookie-val">a3f9c2...8b41</span>
+      <span></span>
+    </div>
+    <div class="cookie-row">
+      <span>username</span>
+      <span class="cookie-val">guest_user</span>
+      <span></span>
+    </div>
+    <div class="cookie-row">
+      <span style="color: #fff; font-weight: 700;">role</span>
+      <span class="cookie-highlight">guest ← change this to "admin"</span>
+      <span class="cookie-edit">double-click!</span>
+    </div>
+    <div class="cookie-row">
+      <span>expires</span>
+      <span class="cookie-val">2025-12-31</span>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active-step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Open DevTools</div>
+        <div class="step-desc">
+          Press <code>F12</code> (Windows) or <code>Cmd + Option + I</code> (Mac) to open DevTools on this page.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Go to the Application tab</div>
+        <div class="step-desc">
+          In DevTools, click the <code>Application</code> tab (you may need to click <code>»</code> to find it). On the left sidebar, expand <code>Cookies</code> and click on the page URL.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Find the "role" cookie</div>
+        <div class="step-desc">
+          Look for a cookie named <code>role</code> with value <code>guest</code>. Double-click on the value field.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Change the value to "admin"</div>
+        <div class="step-desc">
+          Type <code>admin</code> and press <code>Enter</code>. Then click the button below to reload the portal and see what happens!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <div class="hint-icon">💡</div>
+    <div class="hint-text">
+      Can't find the <code>Application</code> tab? Try clicking the <code>≫</code> arrow in the DevTools tab bar. 
+      Once you change the cookie, click the button below — the page reads your cookie to decide what to show you.
+    </div>
+  </div>
+
+  <button class="reload-btn" onclick="checkCookie()">⟳ Reload Portal (Check My Role)</button>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <h3>🧠 What Just Happened?</h3>
+    <p>
+      The website stored your user role directly in a browser cookie with <strong>no cryptographic verification</strong>. When you refreshed, the server blindly read <code>role=admin</code> and gave you full access.
+    </p>
+    <p>
+      Real-world systems solve this with <strong>signed tokens (JWT)</strong> or server-side sessions — meaning the server keeps track of who you are, not your browser. If anyone tampers with the cookie, the signature breaks and access is denied.
+    </p>
+    <p>
+      This vulnerability is called <strong>Insecure Direct Object Reference (IDOR)</strong> and it has caused major real-world breaches.
+    </p>
+  </div>
+
+  <div class="activity-nav">
+    <a href="activity-a.html" class="btn btn-cyan">← Bank Heist</a>
+    <a href="activity-c.html" class="btn btn-pink">Next: SQL Injection →</a>
+  </div>
+
+</div>
+</div>
+
+<script>
+  // Set initial cookie
+  document.cookie = "role=guest; path=/";
+
+  function checkCookie() {
+    const cookies = document.cookie.split(';').reduce((acc, c) => {
+      const [k, v] = c.trim().split('=');
+      acc[k] = v;
+      return acc;
+    }, {});
+
+    const role = cookies['role'] || 'guest';
+
+    if (role === 'admin') {
+      document.getElementById('portalBody').classList.remove('guest-mode');
+      document.getElementById('portalBody').classList.add('admin-mode');
+      document.getElementById('guestView').style.display = 'none';
+      document.getElementById('adminView').classList.add('visible');
+      document.getElementById('roleLabel').innerHTML = 'Logged in as: <strong style="color: #00ff88;">ADMIN ⚡</strong>';
+    } else {
+      document.getElementById('portalBody').classList.add('guest-mode');
+      document.getElementById('portalBody').classList.remove('admin-mode');
+      document.getElementById('guestView').style.display = 'block';
+      document.getElementById('adminView').classList.remove('visible');
+      document.getElementById('roleLabel').innerHTML = 'Logged in as: <strong style="color: #ff8800;">GUEST</strong>';
+    }
+  }
+</script>
+
+</body>
+</html>

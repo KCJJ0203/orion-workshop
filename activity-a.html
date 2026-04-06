@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity 01 — The Bank Heist | NullSec Workshop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --step-color: var(--neon-cyan); }
+
+    .shop-site {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      color: #111;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .shop-header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .shop-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      color: #00f5ff;
+    }
+
+    .shop-body { padding: 24px; }
+
+    .product-card {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .product-emoji { font-size: 3rem; line-height: 1; }
+
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    .product-desc {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #c41e3a;
+      margin-bottom: 12px;
+    }
+
+    .buy-btn {
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .buy-btn:hover { background: #0d3460; }
+
+    .receipt-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .receipt-modal.open { display: flex; }
+
+    .receipt {
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 360px;
+      width: 90%;
+      color: #111;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .receipt h3 { color: #c41e3a; margin-bottom: 10px; font-size: 1.1rem; }
+    .receipt .receipt-amount { font-size: 2rem; font-weight: 700; color: #1a1a2e; margin: 10px 0; }
+    .receipt .receipt-note { font-size: 0.75rem; color: #888; line-height: 1.6; }
+    .receipt-close {
+      margin-top: 16px;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+    }
+
+    .challenge-badge {
+      display: inline-block;
+      background: rgba(0, 245, 255, 0.1);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">NPICT <span>ORION</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="activity-a.html" class="active">Bank Heist</a></li>
+    <li><a href="activity-b.html">Cookie Monster</a></li>
+    <li><a href="activity-c.html">SQL Injection</a></li>
+    <li><a href="activity-d.html">Bonus</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+<div class="activity-page">
+
+  <div class="activity-header">
+    <div class="activity-breadcrumb">
+      <a href="index.html">Home</a> › Activities › Activity 01
+    </div>
+    <div class="activity-tag" style="color: var(--neon-cyan); border-color: var(--neon-cyan);">// ACTIVITY 01 — INSPECT ELEMENT</div>
+    <h1 class="activity-h1">🏦 The Bank Heist</h1>
+    <p class="activity-intro">
+      Every website you visit is just HTML, CSS, and JavaScript — and <strong>you</strong> can edit any of it live in your browser. In this activity, you'll use DevTools to change the price of a laptop on a fake store... and "buy" it for $1.
+    </p>
+  </div>
+
+  <!-- CHALLENGE -->
+  <div class="challenge-badge">🎯 CHALLENGE: Change the MacBook price to $1, then buy it</div>
+
+  <!-- FAKE STORE -->
+  <div class="demo-container">
+    <div class="demo-bar">
+      <div class="demo-dots"><span></span><span></span><span></span></div>
+      <div class="demo-url">🔒 fake-store.nullsec.workshop/products</div>
+    </div>
+    <div class="demo-body">
+      <div class="shop-site">
+        <div class="shop-header">
+          <div class="shop-logo">NullStore</div>
+          <div style="font-size: 0.8rem; color: #aaa;">🛒 Cart (0)</div>
+        </div>
+        <div class="shop-body">
+          <div class="product-card">
+            <div class="product-emoji">💻</div>
+            <div>
+              <div class="product-name">MacBook Pro 16"</div>
+              <div class="product-desc">M3 Max · 64GB RAM · 2TB SSD · Space Black</div>
+              <div class="product-price" id="price">$4,999.00</div>
+              <button class="buy-btn" onclick="buyItem()">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active-step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Right-click on the price</div>
+        <div class="step-desc">
+          Right-click on the red price text that says <code>$4,999.00</code> above. A menu will appear — click <code>Inspect</code> (or "Inspect Element").
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Find the price in the HTML</div>
+        <div class="step-desc">
+          DevTools will highlight the element. You'll see something like <code>&lt;div class="product-price" id="price"&gt;$4,999.00&lt;/div&gt;</code> in blue.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Double-click the text and edit it</div>
+        <div class="step-desc">
+          Double-click on the <code>$4,999.00</code> text inside the HTML tag. Type <code>$1</code> and press <code>Enter</code>. Watch the price on the page change!
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Click "Buy Now" and celebrate</div>
+        <div class="step-desc">
+          Close DevTools and click the <strong>Buy Now</strong> button. Congrats — you just got a MacBook Pro for $1! 🎉
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <div class="hint-icon">💡</div>
+    <div class="hint-text">
+      <strong>Shortcut:</strong> On Windows, press <code>F12</code> to open DevTools instantly. On Mac, press <code>Cmd + Option + I</code>.
+      Then use the <code>Elements</code> tab and look for the element with <code>id="price"</code>.
+    </div>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <h3>🧠 What Just Happened?</h3>
+    <p>
+      You edited the <strong>frontend</strong> of the website — the part that only exists in your browser. The change is visual only; a real secure server would verify the actual price before processing payment.
+    </p>
+    <p>
+      But here's the scary part: <strong>some poorly coded websites DO trust the frontend</strong>. Early e-commerce sites would send the price from the browser to the server — meaning attackers could manipulate it exactly like this and pay less.
+    </p>
+    <p>
+      This is why developers must <strong>never trust client-side data</strong>. All pricing, permissions, and critical logic must live on the server, not the browser.
+    </p>
+    <div class="concept-summary">
+      <p><strong>Teaching point:</strong> a website usually has two big parts working together: the <strong>frontend</strong> and the <strong>backend</strong>.</p>
+    </div>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>Frontend</h4>
+        <p>The frontend is everything users see and interact with in the browser, like text, buttons, images, forms, and menus.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Backend</h4>
+        <p>The backend runs on the server. It stores data, checks permissions, processes requests, and decides what is actually allowed.</p>
+      </div>
+      <div class="concept-card">
+        <h4>HTML</h4>
+        <p><code>HTML</code> gives a webpage its structure. It creates things like headings, paragraphs, links, buttons, and images.</p>
+      </div>
+      <div class="concept-card">
+        <h4>CSS</h4>
+        <p><code>CSS</code> controls how the page looks, including colors, fonts, spacing, borders, and layout.</p>
+      </div>
+      <div class="concept-card">
+        <h4>JavaScript</h4>
+        <p><code>JavaScript</code> adds behavior and interactivity. It can react to clicks, update content, and change what appears on screen.</p>
+      </div>
+      <div class="concept-card">
+        <h4>This Activity</h4>
+        <p>In this challenge, you changed the frontend in your own browser. A secure backend should still check the real price before accepting payment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="activity-nav">
+    <a href="index.html" class="btn btn-cyan">← Back to Home</a>
+    <a href="activity-b.html" class="btn btn-green">Next: Cookie Monster →</a>
+  </div>
+
+</div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="receipt-modal" id="receiptModal">
+  <div class="receipt">
+    <div style="font-size: 2rem; margin-bottom: 8px;">🎉</div>
+    <h3>ORDER CONFIRMED!</h3>
+    <div class="receipt-amount" id="receiptAmount">$4,999.00</div>
+    <div class="receipt-note">
+      MacBook Pro 16" M3 Max<br>
+      Payment processed successfully<br><br>
+      <span style="color: #c41e3a;">⚠️ This is a simulated demo.<br>No real purchase was made.</span>
+    </div>
+    <button class="receipt-close" onclick="closeReceipt()">Close</button>
+  </div>
+</div>
+
+<script>
+  function buyItem() {
+    const price = document.getElementById('price').textContent;
+    document.getElementById('receiptAmount').textContent = price;
+    document.getElementById('receiptModal').classList.add('open');
+  }
+
+  function closeReceipt() {
+    document.getElementById('receiptModal').classList.remove('open');
+  }
+</script>
+
+</body>
+</html>
