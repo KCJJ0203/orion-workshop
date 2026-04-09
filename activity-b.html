@@ -178,6 +178,12 @@
       background: var(--neon-green);
       color: var(--bg-deep);
     }
+
+    .portal-reload {
+      display: flex;
+      justify-content: center;
+      padding: 0 30px 30px;
+    }
   </style>
 </head>
 <body>
@@ -256,6 +262,9 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="portal-reload">
+      <button class="reload-btn" onclick="checkCookie()">⟳ Reload Portal (Check My Role)</button>
     </div>
   </div>
 
@@ -339,8 +348,6 @@
       Once you change the cookie, click the button below — the page reads your cookie to decide what to show you.
     </div>
   </div>
-
-  <button class="reload-btn" onclick="checkCookie()">⟳ Reload Portal (Check My Role)</button>
 
   <!-- EXPLAINER -->
   <div class="explainer">
